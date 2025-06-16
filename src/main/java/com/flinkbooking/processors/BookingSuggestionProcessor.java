@@ -8,6 +8,8 @@ import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.state.StateTtlConfig;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
@@ -29,10 +31,20 @@ public class BookingSuggestionProcessor extends KeyedProcessFunction<String, Boo
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         
+        // Configure state TTL to prevent memory leaks
+        StateTtlConfig ttlConfig = StateTtlConfig
+            .newBuilder(Time.days(30)) // Clean up user state after 30 days of inactivity
+            .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
+            .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+            .build();
+        
         ValueStateDescriptor<UserBehaviorAnalytics> descriptor = new ValueStateDescriptor<>(
             "userBehavior",
             TypeInformation.of(new TypeHint<UserBehaviorAnalytics>() {})
         );
+        
+        // Apply TTL configuration
+        descriptor.enableTimeToLive(ttlConfig);
         
         userBehaviorState = getRuntimeContext().getState(descriptor);
     }
@@ -212,7 +224,8 @@ public class BookingSuggestionProcessor extends KeyedProcessFunction<String, Boo
             // Find top viewed hotels
             List<String> recommendedHotels = findTopHotels(userBehavior.getHotelViewCount(), 3);
             if (recommendedHotels.isEmpty()) {
-                recommendedHotels = Arrays.asList(event.getHotelId());
+                recommendedHotels = new ArrayList<>();
+                recommendedHotels.add(event.getHotelId());
             }
             
             // Calculate suggestion metrics

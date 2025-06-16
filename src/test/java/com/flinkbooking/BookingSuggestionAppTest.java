@@ -3,8 +3,8 @@ package com.flinkbooking;
 import com.flinkbooking.model.BookingEvent;
 import com.flinkbooking.model.BookingSuggestion;
 import com.flinkbooking.model.UserBehaviorAnalytics;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
@@ -105,20 +105,45 @@ public class BookingSuggestionAppTest {
     
     @Test
     public void testBookingEventValidation() {
-        BookingEvent event = new BookingEvent();
-        event.setUserId("user_test");
-        event.setHotelId("hotel_test");
-        event.setEventType("BOOK");
-        event.setDestination("Tokyo");
-        event.setPrice(300.0);
-        event.setRating(4.8);
+        // Test valid event creation
+        assertDoesNotThrow(() -> {
+            new BookingEvent("user_001", "hotel_001", "SEARCH", "Paris", 
+                           "2024-06-01", "2024-06-05", 200.0, 4.5, "Double");
+        });
         
-        assertEquals("user_test", event.getUserId());
-        assertEquals("hotel_test", event.getHotelId());
-        assertEquals("BOOK", event.getEventType());
-        assertEquals("Tokyo", event.getDestination());
-        assertEquals(300.0, event.getPrice(), 0.01);
-        assertEquals(4.8, event.getRating(), 0.01);
+        // Test invalid user ID
+        assertThrows(IllegalArgumentException.class, () -> {
+            new BookingEvent(null, "hotel_001", "SEARCH", "Paris", 
+                           "2024-06-01", "2024-06-05", 200.0, 4.5, "Double");
+        });
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            new BookingEvent("", "hotel_001", "SEARCH", "Paris", 
+                           "2024-06-01", "2024-06-05", 200.0, 4.5, "Double");
+        });
+        
+        // Test invalid event type
+        assertThrows(IllegalArgumentException.class, () -> {
+            new BookingEvent("user_001", "hotel_001", "INVALID", "Paris", 
+                           "2024-06-01", "2024-06-05", 200.0, 4.5, "Double");
+        });
+        
+        // Test invalid price
+        assertThrows(IllegalArgumentException.class, () -> {
+            new BookingEvent("user_001", "hotel_001", "SEARCH", "Paris", 
+                           "2024-06-01", "2024-06-05", -100.0, 4.5, "Double");
+        });
+        
+        // Test invalid rating
+        assertThrows(IllegalArgumentException.class, () -> {
+            new BookingEvent("user_001", "hotel_001", "SEARCH", "Paris", 
+                           "2024-06-01", "2024-06-05", 200.0, 6.0, "Double");
+        });
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            new BookingEvent("user_001", "hotel_001", "SEARCH", "Paris", 
+                           "2024-06-01", "2024-06-05", 200.0, -1.0, "Double");
+        });
     }
     
     @Test

@@ -20,6 +20,7 @@
         <scala.binary.version>2.12</scala.binary.version>
         <kafka.version>3.5.1</kafka.version>
         <jackson.version>2.15.2</jackson.version>
+        <junit.version>5.10.0</junit.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,20 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-csv</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <!-- Kafka Connector (Missing in original) -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka</artifactId>
+            <version>3.0.2-1.18</version>
+        </dependency>
+
+        <!-- Table API (Useful for SQL-like processing) -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java-bridge</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
@@ -98,11 +113,18 @@
             <version>7.4</version>
         </dependency>
 
-        <!-- Testing -->
+        <!-- Testing - Updated to JUnit 5 -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -110,6 +132,21 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-test-utils</artifactId>
             <version>${flink.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers for integration testing -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.19.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>1.19.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -121,8 +158,41 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <release>11</release>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Exec Plugin for easy running with JVM args -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.flinkbooking.BookingSuggestionApp</mainClass>
+                    <options>
+                        <option>--add-opens</option>
+                        <option>java.base/java.util=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.util.concurrent=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.lang=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.lang.invoke=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.math=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.net=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.nio=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.text=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.time=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.util.regex=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.util.concurrent.atomic=ALL-UNNAMED</option>
+                    </options>
                 </configuration>
             </plugin>
 
