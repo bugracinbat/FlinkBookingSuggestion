@@ -186,6 +186,11 @@
     <logger name="org.apache.flink.runtime.executiongraph" level="WARN"/>
     <logger name="flink-pekko.actor" level="WARN"/>
     
+    <!-- Reduce Kryo serializer noise -->
+    <logger name="org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer" level="WARN"/>
+    <logger name="com.twitter.chill" level="WARN"/>
+    <logger name="com.esotericsoftware.kryo" level="WARN"/>
+    
     <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
